@@ -1,0 +1,130 @@
+{
+  "defaultAmount": 1000,
+  "entries": [
+    {
+      "code": "EUR",
+      "id": "eur",
+      "kind": "live",
+      "label": "欧元",
+      "note": "",
+      "target": null,
+      "targetDir": "above"
+    },
+    {
+      "code": "USD",
+      "id": "usd",
+      "kind": "live",
+      "label": "美元",
+      "note": "",
+      "target": null,
+      "targetDir": "above"
+    },
+    {
+      "code": "GBP",
+      "id": "gbp",
+      "kind": "live",
+      "label": "英镑",
+      "note": "",
+      "target": null,
+      "targetDir": "above"
+    },
+    {
+      "code": "HKD",
+      "id": "hkd",
+      "kind": "live",
+      "label": "港币",
+      "note": "",
+      "target": null,
+      "targetDir": "above"
+    },
+    {
+      "code": "JPY",
+      "id": "jpy",
+      "kind": "live",
+      "label": "日元",
+      "note": "",
+      "target": null,
+      "targetDir": "above"
+    },
+    {
+      "code": "KRW",
+      "id": "krw",
+      "kind": "live",
+      "label": "韩元",
+      "note": "",
+      "target": null,
+      "targetDir": "above"
+    },
+    {
+      "code": "AUD",
+      "id": "aud",
+      "kind": "live",
+      "label": "澳元",
+      "note": "",
+      "target": null,
+      "targetDir": "above"
+    },
+    {
+      "code": "CAD",
+      "id": "cad",
+      "kind": "live",
+      "label": "加元",
+      "note": "",
+      "target": null,
+      "targetDir": "above"
+    },
+    {
+      "code": "SGD",
+      "id": "sgd",
+      "kind": "live",
+      "label": "新加坡元",
+      "note": "",
+      "target": null,
+      "targetDir": "above"
+    },
+    {
+      "code": "CHF",
+      "id": "chf",
+      "kind": "live",
+      "label": "瑞士法郎",
+      "note": "",
+      "target": null,
+      "targetDir": "above"
+    },
+    {
+      "code": "THB",
+      "id": "thb",
+      "kind": "live",
+      "label": "泰铢",
+      "note": "",
+      "target": null,
+      "targetDir": "above"
+    },
+    {
+      "code": "EUR",
+      "fixed": null,
+      "id": "bank-eur",
+      "kind": "custom",
+      "label": "银行现汇卖出（示例）",
+      "mode": "spread",
+      "note": "示例行：在实时汇率上加 0.6%，可在管理里改成你自己的银行或汇款报价，或直接删除",
+      "spread": 0.6,
+      "target": null,
+      "targetDir": "above"
+    },
+    {
+      "code": "BTC",
+      "id": "btc",
+      "kind": "live",
+      "label": "比特币",
+      "note": "",
+      "target": null,
+      "targetDir": "above"
+    }
+  ],
+  "per100": false,
+  "schema": 1,
+  "subtitle": "以人民币为基准，实时换算",
+  "title": "人民币汇率台",
+  "updatedAt": "2026-10-18T16:52:13Z"
+}

@@ -1,0 +1,10 @@
+{
+  "name": "exchange-rates",
+  "version": "1.0.0",
+  "private": true,
+  "description": "人民币汇率台：以人民币为基准的实时汇率换算",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test tests/core.test.js tests/github.test.js"
+  }
+}

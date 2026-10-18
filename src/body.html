@@ -1,0 +1,76 @@
+<main class="wrap" id="app">
+  <header class="masthead">
+    <div class="guilloche" aria-hidden="true"><svg id="guilloche" viewBox="0 0 800 120" preserveAspectRatio="none"></svg></div>
+    <div class="brand">
+      <div class="seal" aria-hidden="true">¥</div>
+      <div>
+        <h1 id="siteTitle">人民币汇率台</h1>
+        <p id="siteSub">以人民币为基准，实时换算</p>
+      </div>
+    </div>
+    <div class="topline">
+      <div class="status" id="status" data-state="none" role="status" aria-live="polite"><span class="dot"></span><span id="statusText">正在读取汇率…</span></div>
+      <button class="btn" id="manageBtn" type="button" hidden>管理</button>
+    </div>
+  </header>
+
+  <div class="banner" id="draftBanner" hidden>
+    <span id="draftBannerText">这台设备上有未发布的草稿。</span>
+    <button class="btn sm" id="draftBannerBtn" type="button">继续编辑</button>
+  </div>
+
+  <section class="board" aria-label="汇率换算">
+    <div class="board-head">
+      <span>货币 · 金额（输入任意一行即可换算）</span>
+      <div class="seg" role="group" aria-label="汇率显示方式">
+        <button type="button" id="unit1" aria-pressed="true">每 1 外币</button>
+        <button type="button" id="unit100" aria-pressed="false">每 100 外币</button>
+      </div>
+    </div>
+    <div class="row base">
+      <div class="cur"><span class="code">CNY</span><span class="names"><span class="label">人民币</span><span class="tag">基准货币</span></span></div>
+      <label class="amt"><span class="sr" hidden>人民币金额</span><input id="cnyInput" inputmode="decimal" autocomplete="off" aria-label="人民币金额" value="1,000.00"></label>
+    </div>
+    <ul id="list" style="list-style:none;margin:0;padding:0"></ul>
+  </section>
+
+  <section class="panel" id="sitePanel" hidden aria-label="网站设置">
+    <h2>网站设置</h2>
+    <div class="grid">
+      <label class="field"><span>网站标题</span><input id="fTitle" maxlength="40"></label>
+      <label class="field"><span>副标题</span><input id="fSub" maxlength="80"></label>
+      <label class="field"><span>打开时的人民币金额</span><input id="fAmount" inputmode="decimal"></label>
+      <label class="field"><span>默认汇率显示</span><select id="fPer100"><option value="0">每 1 外币</option><option value="1">每 100 外币</option></select></label>
+    </div>
+    <div class="acts">
+      <button class="btn" type="button" id="pwBtn">修改管理密码</button>
+      <button class="btn" type="button" id="exportBtn">导出 JSON 备份</button>
+      <label class="btn" for="importFile">导入 JSON 备份</label>
+      <input type="file" id="importFile" accept="application/json,.json" hidden>
+    </div>
+    <p class="hint" id="modeHint"></p>
+  </section>
+
+  <footer class="foot" id="foot">
+    <p id="srcNote">汇率来源：Coinbase 公开汇率，备用 ExchangeRate-API。仅供参考，实际兑换以银行或平台报价为准。</p>
+    <p id="chgNote">涨跌按中国市场习惯：红色表示外币对人民币上涨，绿色表示下跌，对比约 24 小时前。</p>
+  </footer>
+</main>
+
+<div class="dock" id="dock" hidden>
+  <div class="dock-in">
+    <div class="dock-state" id="dockState">草稿已保存在本机</div>
+    <div class="dock-btns">
+      <button class="btn ghost sm" type="button" id="undoBtn" aria-label="撤销">撤销</button>
+      <button class="btn ghost sm" type="button" id="redoBtn" aria-label="重做">重做</button>
+      <button class="btn sm" type="button" id="syncBtn">检查云端更新</button>
+      <button class="btn sm" type="button" id="lockBtn">锁定</button>
+      <button class="btn primary sm" type="button" id="publishBtn">发布修改</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"></div>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
