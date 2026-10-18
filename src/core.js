@@ -175,6 +175,32 @@ const FX = (() => {
     return value.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
   }
 
+  /* 换算阶梯：值钱的货币看 10 / 100 / 1000；越南盾、印尼盾这类按能买到东西的量级放大 */
+  function ladderFor(cnyPerUnit) {
+    if (!(cnyPerUnit > 0)) return [];
+    if (cnyPerUnit >= 0.05) return [10, 100, 1000];
+    const s0 = Math.pow(10, Math.ceil(Math.log10(0.1 / cnyPerUnit)));
+    return [s0 * 10, s0 * 100, s0 * 1000];
+  }
+
+  /* 人民币金额：1 元以上两位小数；不足 1 元保留 4 位有效数字 */
+  function fmtCny(value) {
+    if (value === null || !Number.isFinite(value)) return "—";
+    const a = Math.abs(value);
+    if (a >= 1) return value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (a === 0) return "0";
+    const d = Math.min(10, Math.max(2, 3 - Math.floor(Math.log10(a))));
+    return value.toFixed(d).replace(/0+$/, "").replace(/\.$/, "");
+  }
+
+  function fmtInt(n) { return n.toLocaleString("en-US"); }
+
+  /* 商品价格对比：当地价折人民币后与中国价相比的倍数 */
+  function priceRatio(localPrice, cnyPerUnitRate, chinaPrice) {
+    if (!(localPrice > 0) || !(cnyPerUnitRate > 0) || !(chinaPrice > 0)) return null;
+    return (localPrice * cnyPerUnitRate) / chinaPrice;
+  }
+
   function parseAmount(text) {
     const s = String(text ?? "").replace(/[,\s，]/g, "").replace(/。/g, ".");
     if (s === "" || s === ".") return null;
@@ -336,7 +362,7 @@ const FX = (() => {
     CATALOG, NAMES, CRYPTO, PER100_DEFAULT, FIELD_LABEL, clone, same, uid, num,
     emptyConfig, liveEntry, normalizeConfig, normalizeEntry, content,
     cnyPerUnit, entryCny, targetStatus, snapshotNear, seriesFor,
-    fmtAmount, fmtRate, parseAmount, fmtAgo, freshness,
+    fmtAmount, fmtRate, parseAmount, fmtAgo, freshness, ladderFor, fmtCny, fmtInt, priceRatio,
     diff, merge3, resolve, makeLock, checkLock, entryName,
   };
 })();

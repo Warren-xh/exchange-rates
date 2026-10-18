@@ -109,29 +109,14 @@ a { color: var(--accent); text-underline-offset: 2px; }
 /* 牌价板 */
 .board { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
 .board-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 10px 16px; border-bottom: 1px solid var(--line); background: var(--surface-2); font-size: 12px; color: var(--ink-2); letter-spacing: 0.06em; }
-.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; background: var(--surface); }
-.seg button { border: 0; background: transparent; padding: 3px 10px; font-size: 12px; color: var(--ink-2); }
-.seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
 
-.row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 4px 16px; padding: 14px 16px; border-bottom: 1px solid var(--line); align-items: center; }
+.row { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 16px; padding: 16px; border-bottom: 1px solid var(--line); align-items: center; }
 .row:last-child { border-bottom: 0; }
-.row.base { background: color-mix(in srgb, var(--seal) 5%, var(--surface)); }
 .cur { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .code { flex: none; display: inline-grid; place-items: center; min-width: 48px; height: 28px; padding: 0 6px; border-radius: 6px; background: var(--surface-2); font-family: var(--f-num); font-weight: 500; font-size: 13px; letter-spacing: 0.04em; }
-.row.base .code { background: var(--seal); color: #fff; }
 .names { display: grid; min-width: 0; }
 .label { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tag { font-size: 12px; color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.amt { position: relative; display: block; }
-.amt input {
-  width: 100%; text-align: right; border: 1px solid transparent; border-radius: 8px; background: transparent;
-  padding: 4px 8px; font-family: var(--f-num); font-variant-numeric: tabular-nums; font-size: clamp(18px, 4.6vw, 24px); font-weight: 500;
-}
-.amt input:hover { border-color: var(--line); }
-.amt input:focus { border-color: var(--accent); background: var(--paper); outline: none; }
-.amt input[aria-invalid="true"] { border-color: var(--rise); }
-.meta { grid-column: 1 / -1; display: flex; align-items: center; gap: 6px 12px; flex-wrap: wrap; font-size: 13px; color: var(--ink-2); min-width: 0; }
-.rate { font-family: var(--f-num); font-variant-numeric: tabular-nums; }
 .chg { font-family: var(--f-num); font-variant-numeric: tabular-nums; font-size: 12px; padding: 1px 6px; border-radius: 4px; }
 .chg.up { color: var(--rise); background: var(--rise-bg); }
 .chg.down { color: var(--fall); background: var(--ok-bg); }
@@ -205,15 +190,75 @@ footer.foot p { margin: 0; }
 
 @media (max-width: 520px) {
   .row { grid-template-columns: minmax(0, 1fr); }
-  .amt input { text-align: left; padding-left: 0; }
-  .amt input:focus, .amt input:hover { padding-left: 8px; }
-  .spark { width: 64px; }
+    .amt input:focus,   .spark { width: 64px; }
 }
 @media (prefers-reduced-motion: no-preference) {
   .row { transition: background-color 0.2s; }
   .flash { animation: flash 1.2s ease-out; }
   @keyframes flash { from { background: color-mix(in srgb, var(--accent) 14%, var(--surface)); } }
 }
+
+/* 外币 → 人民币 */
+.head { display: flex; align-items: baseline; justify-content: flex-end; gap: 6px; flex-wrap: wrap; min-width: 0; }
+.head b { font-size: clamp(22px, 5vw, 28px); font-weight: 500; letter-spacing: -0.01em; }
+.h-unit { color: var(--ink-2); font-size: 14px; }
+.ladder { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+.step { display: inline-flex; align-items: baseline; gap: 4px; padding: 4px 10px; border-radius: 999px; background: var(--surface-2); font-size: 13px; color: var(--ink-2); white-space: nowrap; }
+.step b { color: var(--ink); font-weight: 500; }
+.foot { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; min-width: 0; }
+.calc { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; font-size: 14px; }
+.calc-in { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); overflow: hidden; }
+.calc-in:focus-within { border-color: var(--accent); }
+.calc-in input { width: 9.5em; border: 0; background: transparent; padding: 6px 8px; font-family: var(--f-num); font-variant-numeric: tabular-nums; outline: none; }
+.calc-in input[aria-invalid] { color: var(--rise); }
+.calc-unit { padding: 0 10px; color: var(--ink-2); font-size: 13px; border-left: 1px solid var(--line); align-self: stretch; display: grid; place-items: center; background: var(--surface-2); }
+.calc-out { color: var(--ink-2); }
+.calc-out b { color: var(--ink); font-size: 16px; font-weight: 500; }
+.meta { display: flex; align-items: center; gap: 6px 10px; flex-wrap: wrap; font-size: 13px; color: var(--ink-2); min-width: 0; }
+.pricebtn { border: 1px solid var(--line); background: var(--surface); color: var(--accent); border-radius: 999px; padding: 2px 10px; font-size: 12px; }
+.pricebtn:hover, .pricebtn[aria-expanded="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--surface)); }
+.hint-hover { color: var(--ink-3); letter-spacing: 0; }
+@media (hover: none), (max-width: 699px) { .hint-hover { display: none; } }
+.sr-title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* 物价卡片 */
+.pop { position: absolute; z-index: 30; width: min(460px, calc(100vw - 32px)); max-height: min(78vh, 640px); overflow: auto; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 2px 6px rgba(19, 38, 58, 0.08), 0 18px 48px rgba(19, 38, 58, 0.18); padding: 16px; }
+.pc { display: grid; gap: 12px; font-size: 13px; }
+.pc-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.pc-head strong { font-family: var(--f-display); font-size: 18px; }
+.pc-head span { color: var(--ink-3); font-size: 12px; }
+.pc-note { margin: 0; color: var(--ink-2); }
+.pc-index { display: grid; gap: 8px; padding: 12px; border-radius: 10px; background: var(--paper); }
+.pc-big { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.pc-big b { font-size: 24px; font-weight: 500; }
+.pc-cmp { color: var(--ink-2); }
+.pc-bars { display: grid; grid-template-columns: auto minmax(0, 1fr) 2.6em minmax(0, 1fr) 2.6em; gap: 5px 8px; align-items: center; }
+.pc-bl { color: var(--ink-2); font-size: 12px; }
+.pc-bar { height: 8px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+.pc-bar i { display: block; height: 100%; border-radius: 4px; }
+.pc-bar.here i { background: var(--accent); }
+.pc-bar.cn i { background: var(--seal); opacity: 0.55; }
+.pc-bv { font-size: 12px; text-align: right; }
+.pc-bv.cn { color: var(--ink-3); }
+.pc-legend { margin: 0; font-size: 12px; color: var(--ink-3); display: flex; align-items: center; gap: 4px 6px; flex-wrap: wrap; }
+.sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
+.sw.here { background: var(--accent); }
+.sw.cn { background: var(--seal); opacity: 0.55; margin-left: 6px; }
+.pc-scroll { overflow-x: auto; }
+.pc-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.pc-table th, .pc-table td { padding: 5px 6px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--line); }
+.pc-table th:first-child, .pc-table td:first-child { text-align: left; white-space: normal; }
+.pc-table thead th { font-size: 11px; color: var(--ink-3); font-weight: 500; letter-spacing: 0.04em; }
+.pc-table .num { font-family: var(--f-num); font-size: 12px; }
+.pc-g th { text-align: left; padding-top: 10px; font-size: 12px; color: var(--ink); font-weight: 700; border-bottom-color: transparent; }
+.pc-u { display: block; color: var(--ink-3); font-size: 11px; }
+.pc-r { font-family: var(--f-num); font-size: 12px; color: var(--ink-2); }
+.pricier { color: var(--rise); }
+.cheaper { color: var(--fall); }
+.pc-r.pricier, .pc-r.cheaper { font-weight: 500; }
+.pc-foot { margin: 0; font-size: 12px; color: var(--ink-3); }
+.modal .pc { font-size: 14px; }
+.pc-table td:first-child { min-width: 7.5em; }
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
@@ -241,15 +286,8 @@ footer.foot p { margin: 0; }
 
   <section class="board" aria-label="汇率换算">
     <div class="board-head">
-      <span>货币 · 金额（输入任意一行即可换算）</span>
-      <div class="seg" role="group" aria-label="汇率显示方式">
-        <button type="button" id="unit1" aria-pressed="true">每 1 外币</button>
-        <button type="button" id="unit100" aria-pressed="false">每 100 外币</button>
-      </div>
-    </div>
-    <div class="row base">
-      <div class="cur"><span class="code">CNY</span><span class="names"><span class="label">人民币</span><span class="tag">基准货币</span></span></div>
-      <label class="amt"><span class="sr" hidden>人民币金额</span><input id="cnyInput" inputmode="decimal" autocomplete="off" aria-label="人民币金额" value="1,000.00"></label>
+      <span>1 外币 = ? 元 · 在任一行输入金额即可换算</span>
+      <span class="hint-hover">鼠标放到货币上，查看当地物价</span>
     </div>
     <ul id="list" style="list-style:none;margin:0;padding:0"></ul>
   </section>
@@ -259,8 +297,6 @@ footer.foot p { margin: 0; }
     <div class="grid">
       <label class="field"><span>网站标题</span><input id="fTitle" maxlength="40"></label>
       <label class="field"><span>副标题</span><input id="fSub" maxlength="80"></label>
-      <label class="field"><span>打开时的人民币金额</span><input id="fAmount" inputmode="decimal"></label>
-      <label class="field"><span>默认汇率显示</span><select id="fPer100"><option value="0">每 1 外币</option><option value="1">每 100 外币</option></select></label>
     </div>
     <div class="acts">
       <button class="btn" type="button" id="pwBtn">修改管理密码</button>
@@ -294,6 +330,7 @@ footer.foot p { margin: 0; }
   <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"></div>
 </div>
 <div class="toast" id="toast" role="status" hidden></div>
+<div class="pop" id="pricePop" role="dialog" aria-label="当地物价" hidden></div>
 
 <script>window.FX_REPO = "Warren-xh/exchange-rates";</script>
 <script>
@@ -474,6 +511,32 @@ const FX = (() => {
     return value.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
   }
 
+  /* 换算阶梯：值钱的货币看 10 / 100 / 1000；越南盾、印尼盾这类按能买到东西的量级放大 */
+  function ladderFor(cnyPerUnit) {
+    if (!(cnyPerUnit > 0)) return [];
+    if (cnyPerUnit >= 0.05) return [10, 100, 1000];
+    const s0 = Math.pow(10, Math.ceil(Math.log10(0.1 / cnyPerUnit)));
+    return [s0 * 10, s0 * 100, s0 * 1000];
+  }
+
+  /* 人民币金额：1 元以上两位小数；不足 1 元保留 4 位有效数字 */
+  function fmtCny(value) {
+    if (value === null || !Number.isFinite(value)) return "—";
+    const a = Math.abs(value);
+    if (a >= 1) return value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (a === 0) return "0";
+    const d = Math.min(10, Math.max(2, 3 - Math.floor(Math.log10(a))));
+    return value.toFixed(d).replace(/0+$/, "").replace(/\.$/, "");
+  }
+
+  function fmtInt(n) { return n.toLocaleString("en-US"); }
+
+  /* 商品价格对比：当地价折人民币后与中国价相比的倍数 */
+  function priceRatio(localPrice, cnyPerUnitRate, chinaPrice) {
+    if (!(localPrice > 0) || !(cnyPerUnitRate > 0) || !(chinaPrice > 0)) return null;
+    return (localPrice * cnyPerUnitRate) / chinaPrice;
+  }
+
   function parseAmount(text) {
     const s = String(text ?? "").replace(/[,\s，]/g, "").replace(/。/g, ".");
     if (s === "" || s === ".") return null;
@@ -635,11 +698,75 @@ const FX = (() => {
     CATALOG, NAMES, CRYPTO, PER100_DEFAULT, FIELD_LABEL, clone, same, uid, num,
     emptyConfig, liveEntry, normalizeConfig, normalizeEntry, content,
     cnyPerUnit, entryCny, targetStatus, snapshotNear, seriesFor,
-    fmtAmount, fmtRate, parseAmount, fmtAgo, freshness,
+    fmtAmount, fmtRate, parseAmount, fmtAgo, freshness, ladderFor, fmtCny, fmtInt, priceRatio,
     diff, merge3, resolve, makeLock, checkLock, entryName,
   };
 })();
 if (typeof module !== "undefined") module.exports = FX;
+
+</script>
+<script>
+/* 各国物价参考数据（Numbeo，2026 年 10 月抓取）。
+   prices 为当地货币；index 为 Numbeo 指数（纽约 = 100）。
+   更新方法：改这里的数字和 updated 日期，然后 node build.mjs。 */
+const PRICES = {
+  source: "Numbeo",
+  sourceUrl: "https://www.numbeo.com/cost-of-living/",
+  baseline: "CN",
+  byCurrency: { EUR: "IE", THB: "TH", VND: "VN", IDR: "ID", MAD: "MA", JPY: "JP" },
+  groups: [
+    { name: "餐饮", items: [
+      ["meal_cheap", "平价餐厅一餐", ""],
+      ["meal_mid2", "中档餐厅两人套餐", "三道菜"],
+      ["mcmeal", "麦当劳套餐", ""],
+      ["cappuccino", "卡布奇诺", "常规杯"],
+      ["beer", "生啤", "1 品脱，餐厅"],
+    ] },
+    { name: "超市", items: [
+      ["water", "瓶装水", "1.5 L"],
+      ["coke", "可乐", "355 ml"],
+      ["milk", "牛奶", "1 L"],
+      ["bread", "白面包", "454 g"],
+      ["rice", "大米", "454 g"],
+      ["eggs", "鸡蛋", "12 个"],
+    ] },
+    { name: "交通", items: [
+      ["ticket", "公交 / 地铁单程票", ""],
+      ["taxi", "出租车起步价", ""],
+      ["gas", "汽油", "1 L"],
+    ] },
+    { name: "居住与收入（每月）", items: [
+      ["rent", "市中心一居室租金", ""],
+      ["utilities", "水电燃气", "85 ㎡"],
+      ["internet", "宽带", ""],
+      ["salary", "平均税后月薪", ""],
+    ] },
+  ],
+  countries: {
+    CN: { name: "中国", currency: "CNY", updated: "2026-10-18", indexPeriod: "2026 年年中",
+      index: { col: 30.7, rent: 9.5, groceries: 36.3, restaurant: 21.1, lpp: 94.2 },
+      prices: { meal_cheap: 20, meal_mid2: 150, mcmeal: 35, beer: 7, cappuccino: 20.01, coke: 3.32, water: 3.83, milk: 11.86, bread: 10.04, rice: 2.9, eggs: 10.56, ticket: 2, taxi: 10, gas: 8.57, utilities: 368.01, internet: 72.93, rent: 2610.81, salary: 7204.67 } },
+    IE: { name: "爱尔兰", note: "欧元区各国物价差别大，这里以爱尔兰为例", currency: "EUR", updated: "2026-10-15", indexPeriod: "2026 年年中",
+      index: { col: 70.8, rent: 41.4, groceries: 70.6, restaurant: 76.3, lpp: 113.0 },
+      prices: { meal_cheap: 20, meal_mid2: 80, mcmeal: 11, beer: 6, cappuccino: 3.98, coke: 2.51, water: 1.82, milk: 1.41, bread: 1.81, rice: 0.77, eggs: 3.95, ticket: 2, taxi: 5, gas: 1.82, utilities: 220.66, internet: 47.13, rent: 1574.71, salary: 3061.61 } },
+    TH: { name: "泰国", currency: "THB", updated: "2026-10-16", indexPeriod: "2026 年年中",
+      index: { col: 36.8, rent: 12.8, groceries: 43.5, restaurant: 23.5, lpp: 41.0 },
+      prices: { meal_cheap: 100, meal_mid2: 900, mcmeal: 220, beer: 75, cappuccino: 68.34, coke: 22.67, water: 16.93, milk: 60.11, bread: 41.69, rice: 19.44, eggs: 70.46, ticket: 30, taxi: 40, gas: 45.83, utilities: 2792.81, internet: 620.19, rent: 15728.21, salary: 18888.96 } },
+    VN: { name: "越南", currency: "VND", updated: "2026-10-17", indexPeriod: "2026 年年中",
+      index: { col: 26.9, rent: 9.6, groceries: 32.6, restaurant: 15.7, lpp: 40.5 },
+      prices: { meal_cheap: 50000, meal_mid2: 500000, mcmeal: 119000, beer: 25000, cappuccino: 43417.05, coke: 13187.72, water: 12999.23, milk: 38759.16, bread: 23322.78, rice: 11036.41, eggs: 39495.89, ticket: 8453.7, taxi: 20000, gas: 23619.8, utilities: 1896833.8, internet: 241220.96, rent: 10685924.8, salary: 10670355.93 } },
+    ID: { name: "印度尼西亚", currency: "IDR", updated: "2026-10-15", indexPeriod: "2026 年年中",
+      index: { col: 24.7, rent: 7.8, groceries: 32.6, restaurant: 13.3, lpp: 28.5 },
+      prices: { meal_cheap: 30000, meal_mid2: 210000, mcmeal: 58000, beer: 40000, cappuccino: 28166.21, coke: 8565.89, water: 7717.14, milk: 21537.73, bread: 18199.72, rice: 6954.23, eggs: 26992.55, ticket: 5000, taxi: 10000, gas: 14235.86, utilities: 1168057.64, internet: 351762.96, rent: 5315054.83, salary: 4725522.09 } },
+    MA: { name: "摩洛哥", currency: "MAD", updated: "2026-10-18", indexPeriod: "2026 年初",
+      index: { col: 31.4, rent: 8.3, groceries: 33.0, restaurant: 25.0, lpp: 45.6 },
+      prices: { meal_cheap: 40, meal_mid2: 250, mcmeal: 68, beer: 40, cappuccino: 16.21, coke: 6.44, water: 5.7, milk: 8.59, bread: 5.43, rice: 7.59, eggs: 17.92, ticket: 5, taxi: 7, gas: 14.47, utilities: 385.01, internet: 367.16, rent: 3475.06, salary: 4517.79 } },
+    JP: { name: "日本", currency: "JPY", updated: "2026-10-17", indexPeriod: "2026 年年中",
+      index: { col: 47.6, rent: 13.6, groceries: 58.2, restaurant: 30.8, lpp: 107.3 },
+      prices: { meal_cheap: 1000, meal_mid2: 5000, mcmeal: 800, beer: 500, cappuccino: 495.91, coke: 180.3, water: 136.99, milk: 231.31, bread: 213.34, rice: 345.66, eggs: 325.28, ticket: 220, taxi: 595, gas: 171.66, utilities: 24327.46, internet: 5214.89, rent: 88349.75, salary: 326871.72 } },
+  },
+};
+if (typeof module !== "undefined") module.exports = PRICES;
 
 </script>
 <script>
@@ -768,7 +895,7 @@ if (typeof module !== "undefined") module.exports = GH;
   };
   const TAB = "t" + Math.random().toString(36).slice(2, 10);
   const IDLE_MS = 15 * 60e3;
-  const STANDALONE_CODES = ["EUR", "USD", "GBP", "HKD", "JPY", "KRW", "AUD", "CAD", "SGD", "CHF", "THB", "MOP", "TWD", "BTC"];
+  const STANDALONE_CODES = ["EUR", "THB", "VND", "IDR", "MAD", "JPY"];
   const REPO = window.FX_REPO || "";
   const CONFIG_PATH = "data/config.json", VAULT_PATH = "data/vault.json";
   const shared = () => S.mode === "cloud" || S.mode === "pages"; /* 有云端版本、需要发布的模式 */
@@ -780,7 +907,7 @@ if (typeof module !== "undefined") module.exports = GH;
     published: null, publishedLoaded: false,
     editing: false, unlocked: false,
     draft: null, baseline: null, undo: [], redo: [], fieldBefore: null,
-    cny: null, per100: null, lastActivity: Date.now(), busy: false,
+    amounts: {}, lastActivity: Date.now(), busy: false, popFor: null,
     gh: null, vault: undefined, daily: false,
   };
 
@@ -799,20 +926,14 @@ if (typeof module !== "undefined") module.exports = GH;
     store.set(LS_LOCAL, c);
     return c;
   }
-  function per100On() {
-    if (S.per100 !== null) return S.per100;
-    return !!view().per100;
-  }
-  function perFor(code) { return per100On() && !FX.CRYPTO.has(code) ? 100 : 1; }
+  const unitName = (code) => (FX.NAMES[code] || code).replace(/（.*）/, "");
+  const priceCountry = (code) => (typeof PRICES !== "undefined" && PRICES.byCurrency[code] && PRICES.countries[PRICES.byCurrency[code]]) || null;
 
   /* ---------- 渲染 ---------- */
   function render() {
     const c = view();
     $("siteTitle").textContent = c.title;
     $("siteSub").textContent = c.subtitle;
-    if (S.cny === null && (S.mode === "standalone" || S.publishedLoaded)) S.cny = c.defaultAmount;
-    $("unit1").setAttribute("aria-pressed", String(!per100On()));
-    $("unit100").setAttribute("aria-pressed", String(per100On()));
     renderList();
     renderSitePanel();
     renderDock();
@@ -821,8 +942,8 @@ if (typeof module !== "undefined") module.exports = GH;
     updateNumbers();
     $("manageBtn").hidden = !(S.mode === "standalone" || S.mode === "pages" || (S.mode === "cloud" && S.canEdit));
     $("srcNote").textContent = S.mode === "pages" || S.mode === "standalone"
-      ? "汇率每分钟从 Coinbase 公开汇率刷新，备用 ExchangeRate-API；涨跌和走势参考欧洲央行每日参考价（Frankfurter）。仅供参考，实际兑换以银行或平台报价为准。"
-      : "汇率来源：Coinbase 公开汇率，备用 ExchangeRate-API。仅供参考，实际兑换以银行或平台报价为准。";
+      ? "汇率每分钟从 Coinbase 公开汇率刷新，备用 ExchangeRate-API；涨跌和走势参考欧洲央行每日参考价（Frankfurter）。物价数据来自 Numbeo（2026 年 10 月）。仅供参考，实际兑换以银行或平台报价为准。"
+      : "汇率来源：Coinbase 公开汇率，备用 ExchangeRate-API。物价数据来自 Numbeo（2026 年 10 月）。仅供参考，实际兑换以银行或平台报价为准。";
     $("chgNote").textContent = S.daily
       ? "涨跌按中国市场习惯：红色表示外币对人民币上涨，绿色表示下跌，对比上一个欧洲央行参考价（工作日更新）。"
       : "涨跌按中国市场习惯：红色表示外币对人民币上涨，绿色表示下跌，对比约 24 小时前。";
@@ -856,8 +977,12 @@ if (typeof module !== "undefined") module.exports = GH;
     const id = esc(e.id);
     let html = `<li class="row" data-id="${id}">
       <div class="cur"><span class="code">${esc(e.code)}</span><span class="names"><span class="label" data-t="label">${esc(e.label)}</span><span class="tag" data-t="tag">${esc(tagText(e))}</span></span></div>
-      <label class="amt"><input data-amt="${id}" inputmode="decimal" autocomplete="off" aria-label="${esc(e.label)}金额"></label>
-      <div class="meta"><span class="rate" data-t="rate"></span><span data-t="chg"></span><span data-t="spark"></span><span data-t="pill"></span></div>
+      <div class="head" data-t="head"></div>
+      <div class="ladder" data-t="ladder"></div>
+      <div class="foot">
+        <label class="calc"><span class="calc-in"><input data-amt="${id}" inputmode="decimal" autocomplete="off" placeholder="输入金额" aria-label="${esc(unitName(e.code))}金额" value="${esc(S.amounts[e.id] ?? "")}"><span class="calc-unit">${esc(unitName(e.code))}</span></span><span class="calc-out" data-t="out">= — 元</span></label>
+        <div class="meta"><span data-t="chg"></span><span data-t="spark"></span><span data-t="pill"></span>${priceCountry(e.code) ? `<button type="button" class="pricebtn" data-price="${id}" aria-expanded="false">${esc(priceCountry(e.code).name)}物价</button>` : ""}</div>
+      </div>
       <p class="note" data-t="note"${e.note ? "" : " hidden"}>${esc(e.note)}</p>`;
     if (S.editing) {
       const opt = (v, cur, label) => `<option value="${v}"${cur === v ? " selected" : ""}>${label}</option>`;
@@ -898,9 +1023,6 @@ if (typeof module !== "undefined") module.exports = GH;
     const rates = S.rates && S.rates.rates;
     const now = Date.now();
     const active = document.activeElement;
-    const cnyIn = $("cnyInput");
-    if (active !== cnyIn) cnyIn.value = S.cny === null ? "" : FX.fmtAmount(S.cny, "CNY");
-    cnyIn.removeAttribute("aria-invalid");
     /* 每日数据（欧洲央行）取至少 12 小时前的最近一条；逐小时数据取约 24 小时前 */
     const past = S.daily
       ? S.history.filter((h) => Date.parse(h.t) <= now - 12 * 3600e3).sort((a, b) => Date.parse(b.t) - Date.parse(a.t))[0] || null
@@ -911,22 +1033,22 @@ if (typeof module !== "undefined") module.exports = GH;
       const li = document.querySelector(`li[data-id="${CSS.escape(e.id)}"]`);
       if (!li) continue;
       const val = FX.entryCny(e, rates);
+      const unit = unitName(e.code);
       const input = li.querySelector("input[data-amt]");
-      if (input !== active) input.value = val && S.cny !== null ? FX.fmtAmount(S.cny / val, e.code) : "";
-      input.placeholder = val ? "0" : "—";
       input.disabled = !val;
+      updateCalc(li, e, val);
       li.querySelector('[data-t="label"]').textContent = e.label;
       li.querySelector('[data-t="tag"]').textContent = tagText(e);
       const note = li.querySelector('[data-t="note"]');
       note.textContent = e.note; note.hidden = !e.note;
-      const rateEl = li.querySelector('[data-t="rate"]');
+      const headEl = li.querySelector('[data-t="head"]');
+      const ladderEl = li.querySelector('[data-t="ladder"]');
       if (val) {
-        const per = perFor(e.code);
-        rateEl.textContent = `${per} ${e.code} = ${FX.fmtRate(val * per)} 元`;
-        rateEl.className = "rate";
+        headEl.innerHTML = `<span class="h-unit">1 ${esc(unit)} =</span> <b class="num">${esc(FX.fmtRate(val))}</b> <span class="h-unit">元</span>`;
+        ladderEl.innerHTML = FX.ladderFor(val).map((n) => `<span class="step"><span class="num">${FX.fmtInt(n)}</span> ${esc(unit)} = <b class="num">${esc(FX.fmtCny(n * val))}</b> 元</span>`).join("");
       } else {
-        rateEl.textContent = S.rates ? (e.kind === "custom" && e.mode === "fixed" ? "请填写固定汇率" : `暂无 ${e.code} 汇率，下次更新时获取`) : "等待汇率";
-        rateEl.className = "pending";
+        headEl.innerHTML = `<span class="pending">${S.rates ? (e.kind === "custom" && e.mode === "fixed" ? "请填写固定汇率" : `暂无 ${esc(e.code)} 汇率`) : "等待汇率"}</span>`;
+        ladderEl.innerHTML = "";
       }
       const fixed = e.kind === "custom" && e.mode === "fixed";
       const liveNow = FX.cnyPerUnit(rates, e.code);
@@ -944,6 +1066,7 @@ if (typeof module !== "undefined") module.exports = GH;
       const tgt = st ? ` · 目标 ${e.targetDir === "below" ? "≤" : "≥"} ${FX.fmtRate(e.target)}` : "";
       li.querySelector('[data-t="pill"]').innerHTML = st ? `<span class="pill ${st.state}" title="目标${e.targetDir === "below" ? "低于" : "高于"} ${esc(FX.fmtRate(e.target))} 元">${esc(st.text)}${esc(tgt)}</span>` : "";
     }
+    if (S.popFor && !$("pricePop").hidden) $("pricePop").innerHTML = priceCardHtml(S.popFor.code);
   }
 
   function renderStatus() {
@@ -972,7 +1095,7 @@ if (typeof module !== "undefined") module.exports = GH;
     if (!S.editing) return;
     const c = S.draft;
     const set = (id, v) => { const el = $(id); if (document.activeElement !== el) el.value = v; };
-    set("fTitle", c.title); set("fSub", c.subtitle); set("fAmount", String(c.defaultAmount)); set("fPer100", c.per100 ? "1" : "0");
+    set("fTitle", c.title); set("fSub", c.subtitle);
     $("pwBtn").hidden = !shared();
     $("pwBtn").textContent = S.mode === "pages" ? "修改密码 / 更换令牌" : "修改管理密码";
     $("modeHint").textContent = S.mode === "cloud"
@@ -1007,29 +1130,121 @@ if (typeof module !== "undefined") module.exports = GH;
   }
 
   /* ---------- 金额输入 ---------- */
-  $("cnyInput").addEventListener("input", (ev) => {
-    const v = FX.parseAmount(ev.target.value);
-    if (Number.isNaN(v)) { ev.target.setAttribute("aria-invalid", "true"); return; }
-    ev.target.removeAttribute("aria-invalid");
-    S.cny = v === null ? 0 : v;
-    updateNumbers();
+  /* ---------- 物价卡片 ---------- */
+  function priceCardHtml(code) {
+    const c = priceCountry(code);
+    if (!c) return "";
+    const cn = PRICES.countries[PRICES.baseline];
+    const rate = FX.cnyPerUnit(S.rates && S.rates.rates, code);
+    const col = c.index.col / cn.index.col;
+    const times = (r) => (r >= 1 ? `约为中国的 ${r.toFixed(r >= 10 ? 0 : 1)} 倍` : `约为中国的 ${Math.round(r * 100)}%`);
+    const bars = [["生活成本", "col"], ["超市", "groceries"], ["餐厅", "restaurant"], ["房租", "rent"]];
+    const max = Math.max(...bars.flatMap(([, k]) => [c.index[k], cn.index[k]])) * 1.08;
+    const bar = (v, cls) => `<span class="pc-bar ${cls}"><i style="width:${((v / max) * 100).toFixed(1)}%"></i></span>`;
+    const ratioCell = (key, local, china) => {
+      const r = FX.priceRatio(local, rate, china);
+      if (r === null) return `<td class="pc-r">—</td>`;
+      const cls = key === "salary" ? "" : r > 1.15 ? "pricier" : r < 0.87 ? "cheaper" : "";
+      return `<td class="pc-r ${cls}">×${r.toFixed(r >= 10 ? 0 : r >= 1 ? 1 : 2)}</td>`;
+    };
+    return `<div class="pc">
+      <div class="pc-head"><strong>${esc(c.name)}物价</strong><span>Numbeo · ${esc(c.updated)}</span></div>
+      ${c.note ? `<p class="pc-note">${esc(c.note)}</p>` : ""}
+      <div class="pc-index">
+        <div class="pc-big"><span>生活成本指数</span><b class="num">${c.index.col.toFixed(1)}</b><span class="pc-cmp">中国 ${cn.index.col.toFixed(1)} · ${times(col)}</span></div>
+        <div class="pc-bars">${bars.map(([label, k]) => `<span class="pc-bl">${label}</span>${bar(c.index[k], "here")}<span class="pc-bv num">${c.index[k].toFixed(1)}</span>${bar(cn.index[k], "cn")}<span class="pc-bv cn num">${cn.index[k].toFixed(1)}</span>`).join("")}</div>
+        <p class="pc-legend"><span class="sw here"></span>${esc(c.name)} <span class="sw cn"></span>中国 · 指数以纽约 = 100，${esc(c.indexPeriod)}</p>
+      </div>
+      <div class="pc-scroll"><table class="pc-table">
+        <thead><tr><th>商品</th><th>当地（${esc(c.currency)}）</th><th>≈ 人民币</th><th>中国的几倍</th></tr></thead>
+        ${PRICES.groups.map((g) => `<tbody><tr class="pc-g"><th colspan="4">${esc(g.name)}</th></tr>${g.items.map(([k, label, unit]) => {
+          const local = c.prices[k], china = cn.prices[k];
+          return `<tr><td>${esc(label)}${unit ? `<span class="pc-u">${esc(unit)}</span>` : ""}</td><td class="num">${esc(FX.fmtAmount(local, code))}</td><td class="num">${rate ? "¥" + esc(FX.fmtCny(local * rate)) : "—"}</td>${ratioCell(k, local, china)}</tr>`;
+        }).join("")}</tbody>`).join("")}
+      </table></div>
+      <p class="pc-foot">价格为全国平均，大城市通常更高；人民币折算按当前实时汇率。<span class="pricier">红</span>表示比中国贵，<span class="cheaper">绿</span>表示比中国便宜。</p>
+    </div>`;
+  }
+
+  const pop = () => $("pricePop");
+  const finePointer = () => matchMedia("(hover: hover) and (pointer: fine)").matches && innerWidth >= 700;
+  let popTimer = 0, hideTimer = 0;
+  function showPop(li, viaButton) {
+    const e = view().entries.find((x) => x.id === li.dataset.id);
+    if (!e || !priceCountry(e.code)) return;
+    clearTimeout(hideTimer);
+    if (!finePointer()) { openModal(`<h2 id="modalTitle" class="sr-title">${esc(priceCountry(e.code).name)}物价</h2>${priceCardHtml(e.code)}<div class="acts"><button class="btn" type="button" data-close>关闭</button></div>`); return; }
+    const p = pop();
+    S.popFor = { id: e.id, code: e.code };
+    p.innerHTML = priceCardHtml(e.code);
+    p.hidden = false;
+    const r = li.getBoundingClientRect();
+    const w = p.offsetWidth, h = p.offsetHeight;
+    let left = Math.min(r.right - w - 8, innerWidth - w - 16);
+    left = Math.max(16, left);
+    let top = r.top + scrollY + 52;
+    if (r.top + 52 + h > innerHeight - 12 && r.top - h - 8 > 0) top = r.top + scrollY - h + 8; /* 下面放不下就放到上面 */
+    p.style.left = left + scrollX + "px";
+    p.style.top = top + "px";
+    document.querySelectorAll(".pricebtn[aria-expanded=true]").forEach((b) => b.setAttribute("aria-expanded", "false"));
+    li.querySelector(".pricebtn")?.setAttribute("aria-expanded", "true");
+    if (viaButton) p.dataset.pinned = "1"; else delete p.dataset.pinned;
+  }
+  function hidePop(force) {
+    const p = pop();
+    if (!force && p.dataset.pinned) return;
+    p.hidden = true; delete p.dataset.pinned; S.popFor = null;
+    document.querySelectorAll(".pricebtn[aria-expanded=true]").forEach((b) => b.setAttribute("aria-expanded", "false"));
+  }
+  $("list").addEventListener("mouseover", (ev) => {
+    if (S.editing || !finePointer()) return;
+    const li = ev.target.closest("li[data-id]");
+    if (!li || (S.popFor && S.popFor.id === li.dataset.id)) { clearTimeout(hideTimer); return; }
+    clearTimeout(popTimer);
+    popTimer = setTimeout(() => showPop(li, false), 220);
   });
-  $("cnyInput").addEventListener("blur", () => updateNumbers());
+  $("list").addEventListener("mouseout", (ev) => {
+    const li = ev.target.closest("li[data-id]");
+    if (!li || li.contains(ev.relatedTarget) || pop().contains(ev.relatedTarget)) return;
+    clearTimeout(popTimer);
+    hideTimer = setTimeout(() => hidePop(false), 180);
+  });
+  document.addEventListener("mouseover", (ev) => { if (pop().contains(ev.target)) clearTimeout(hideTimer); });
+  $("pricePop").addEventListener("mouseleave", (ev) => {
+    if (ev.relatedTarget && ev.relatedTarget.closest && ev.relatedTarget.closest(`li[data-id]`)) return;
+    hideTimer = setTimeout(() => hidePop(false), 180);
+  });
+  $("list").addEventListener("click", (ev) => {
+    const b = ev.target.closest("button.pricebtn");
+    if (!b) return;
+    const li = b.closest("li[data-id]");
+    if (!pop().hidden && S.popFor && S.popFor.id === li.dataset.id && pop().dataset.pinned) return hidePop(true);
+    showPop(li, true);
+  });
+  document.addEventListener("click", (ev) => {
+    if (pop().hidden || pop().contains(ev.target) || ev.target.closest("button.pricebtn")) return;
+    hidePop(true);
+  });
+  document.addEventListener("keydown", (ev) => { if (ev.key === "Escape" && !pop().hidden) hidePop(true); });
+  window.addEventListener("resize", () => hidePop(true));
+
+  function updateCalc(li, e, val) {
+    const input = li.querySelector("input[data-amt]");
+    const out = li.querySelector('[data-t="out"]');
+    const v = FX.parseAmount(input.value);
+    input.toggleAttribute("aria-invalid", Number.isNaN(v));
+    out.innerHTML = val && v !== null && !Number.isNaN(v) ? `= <b class="num">${esc(FX.fmtCny(v * val))}</b> 元` : "= — 元";
+  }
   $("list").addEventListener("input", (ev) => {
     const t = ev.target;
     if (t.dataset.amt) {
       const e = view().entries.find((x) => x.id === t.dataset.amt);
-      const val = e && FX.entryCny(e, S.rates && S.rates.rates);
-      const v = FX.parseAmount(t.value);
-      if (Number.isNaN(v) || !val) { t.setAttribute("aria-invalid", "true"); return; }
-      t.removeAttribute("aria-invalid");
-      S.cny = (v === null ? 0 : v) * val;
-      updateNumbers();
+      S.amounts[t.dataset.amt] = t.value;
+      if (e) updateCalc(t.closest("li"), e, FX.entryCny(e, S.rates && S.rates.rates));
       return;
     }
     if (t.dataset.f && S.editing) editField(t, false);
   });
-  $("list").addEventListener("focusout", (ev) => { if (ev.target.dataset.amt) updateNumbers(); });
 
   /* ---------- 编辑 ---------- */
   const NUM_FIELDS = new Set(["fixed", "spread", "target"]);
@@ -1099,17 +1314,14 @@ if (typeof module !== "undefined") module.exports = GH;
     const d = S.draft;
     if (t.id === "fTitle") d.title = t.value;
     if (t.id === "fSub") d.subtitle = t.value;
-    if (t.id === "fAmount") { const v = FX.parseAmount(t.value); if (v > 0) d.defaultAmount = v; }
-    if (t.id === "fPer100") d.per100 = t.value === "1";
     $("siteTitle").textContent = d.title || "人民币汇率台";
     $("siteSub").textContent = d.subtitle;
     saveDraft();
-    if (t.id === "fPer100") { S.per100 = null; render(); }
     renderDock();
   }
   $("sitePanel").addEventListener("input", sitePanelInput);
   $("sitePanel").addEventListener("change", (ev) => {
-    if (["fTitle", "fSub", "fAmount", "fPer100"].includes(ev.target.id)) {
+    if (["fTitle", "fSub"].includes(ev.target.id)) {
       S.draft = FX.content(S.draft); saveDraft();
       pushUndoFrom(S.fieldBefore); S.fieldBefore = JSON.stringify(S.draft);
     }
@@ -1612,9 +1824,6 @@ if (typeof module !== "undefined") module.exports = GH;
   });
 
   /* ---------- 显示方式 ---------- */
-  const setPer = (on) => { S.per100 = on; store.set(LS_VIEW, { per100: on }); render(); };
-  $("unit1").addEventListener("click", () => setPer(false));
-  $("unit100").addEventListener("click", () => setPer(true));
 
   /* ---------- 弹窗与提示 ---------- */
   let lastFocus = null;
@@ -1768,8 +1977,6 @@ if (typeof module !== "undefined") module.exports = GH;
   }
 
   /* ---------- 启动 ---------- */
-  const view0 = store.get(LS_VIEW);
-  if (view0 && typeof view0.per100 === "boolean") S.per100 = view0.per100;
   render();
   if (window.claude && typeof window.claude.use === "function") {
     window.claude.use("db").then((db) => {

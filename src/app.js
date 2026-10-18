@@ -10,7 +10,7 @@
   };
   const TAB = "t" + Math.random().toString(36).slice(2, 10);
   const IDLE_MS = 15 * 60e3;
-  const STANDALONE_CODES = ["EUR", "USD", "GBP", "HKD", "JPY", "KRW", "AUD", "CAD", "SGD", "CHF", "THB", "MOP", "TWD", "BTC"];
+  const STANDALONE_CODES = ["EUR", "THB", "VND", "IDR", "MAD", "JPY"];
   const REPO = window.FX_REPO || "";
   const CONFIG_PATH = "data/config.json", VAULT_PATH = "data/vault.json";
   const shared = () => S.mode === "cloud" || S.mode === "pages"; /* 有云端版本、需要发布的模式 */
@@ -22,7 +22,7 @@
     published: null, publishedLoaded: false,
     editing: false, unlocked: false,
     draft: null, baseline: null, undo: [], redo: [], fieldBefore: null,
-    cny: null, per100: null, lastActivity: Date.now(), busy: false,
+    amounts: {}, lastActivity: Date.now(), busy: false, popFor: null,
     gh: null, vault: undefined, daily: false,
   };
 
@@ -41,20 +41,14 @@
     store.set(LS_LOCAL, c);
     return c;
   }
-  function per100On() {
-    if (S.per100 !== null) return S.per100;
-    return !!view().per100;
-  }
-  function perFor(code) { return per100On() && !FX.CRYPTO.has(code) ? 100 : 1; }
+  const unitName = (code) => (FX.NAMES[code] || code).replace(/（.*）/, "");
+  const priceCountry = (code) => (typeof PRICES !== "undefined" && PRICES.byCurrency[code] && PRICES.countries[PRICES.byCurrency[code]]) || null;
 
   /* ---------- 渲染 ---------- */
   function render() {
     const c = view();
     $("siteTitle").textContent = c.title;
     $("siteSub").textContent = c.subtitle;
-    if (S.cny === null && (S.mode === "standalone" || S.publishedLoaded)) S.cny = c.defaultAmount;
-    $("unit1").setAttribute("aria-pressed", String(!per100On()));
-    $("unit100").setAttribute("aria-pressed", String(per100On()));
     renderList();
     renderSitePanel();
     renderDock();
@@ -63,8 +57,8 @@
     updateNumbers();
     $("manageBtn").hidden = !(S.mode === "standalone" || S.mode === "pages" || (S.mode === "cloud" && S.canEdit));
     $("srcNote").textContent = S.mode === "pages" || S.mode === "standalone"
-      ? "汇率每分钟从 Coinbase 公开汇率刷新，备用 ExchangeRate-API；涨跌和走势参考欧洲央行每日参考价（Frankfurter）。仅供参考，实际兑换以银行或平台报价为准。"
-      : "汇率来源：Coinbase 公开汇率，备用 ExchangeRate-API。仅供参考，实际兑换以银行或平台报价为准。";
+      ? "汇率每分钟从 Coinbase 公开汇率刷新，备用 ExchangeRate-API；涨跌和走势参考欧洲央行每日参考价（Frankfurter）。物价数据来自 Numbeo（2026 年 10 月）。仅供参考，实际兑换以银行或平台报价为准。"
+      : "汇率来源：Coinbase 公开汇率，备用 ExchangeRate-API。物价数据来自 Numbeo（2026 年 10 月）。仅供参考，实际兑换以银行或平台报价为准。";
     $("chgNote").textContent = S.daily
       ? "涨跌按中国市场习惯：红色表示外币对人民币上涨，绿色表示下跌，对比上一个欧洲央行参考价（工作日更新）。"
       : "涨跌按中国市场习惯：红色表示外币对人民币上涨，绿色表示下跌，对比约 24 小时前。";
@@ -98,8 +92,12 @@
     const id = esc(e.id);
     let html = `<li class="row" data-id="${id}">
       <div class="cur"><span class="code">${esc(e.code)}</span><span class="names"><span class="label" data-t="label">${esc(e.label)}</span><span class="tag" data-t="tag">${esc(tagText(e))}</span></span></div>
-      <label class="amt"><input data-amt="${id}" inputmode="decimal" autocomplete="off" aria-label="${esc(e.label)}金额"></label>
-      <div class="meta"><span class="rate" data-t="rate"></span><span data-t="chg"></span><span data-t="spark"></span><span data-t="pill"></span></div>
+      <div class="head" data-t="head"></div>
+      <div class="ladder" data-t="ladder"></div>
+      <div class="foot">
+        <label class="calc"><span class="calc-in"><input data-amt="${id}" inputmode="decimal" autocomplete="off" placeholder="输入金额" aria-label="${esc(unitName(e.code))}金额" value="${esc(S.amounts[e.id] ?? "")}"><span class="calc-unit">${esc(unitName(e.code))}</span></span><span class="calc-out" data-t="out">= — 元</span></label>
+        <div class="meta"><span data-t="chg"></span><span data-t="spark"></span><span data-t="pill"></span>${priceCountry(e.code) ? `<button type="button" class="pricebtn" data-price="${id}" aria-expanded="false">${esc(priceCountry(e.code).name)}物价</button>` : ""}</div>
+      </div>
       <p class="note" data-t="note"${e.note ? "" : " hidden"}>${esc(e.note)}</p>`;
     if (S.editing) {
       const opt = (v, cur, label) => `<option value="${v}"${cur === v ? " selected" : ""}>${label}</option>`;
@@ -140,9 +138,6 @@
     const rates = S.rates && S.rates.rates;
     const now = Date.now();
     const active = document.activeElement;
-    const cnyIn = $("cnyInput");
-    if (active !== cnyIn) cnyIn.value = S.cny === null ? "" : FX.fmtAmount(S.cny, "CNY");
-    cnyIn.removeAttribute("aria-invalid");
     /* 每日数据（欧洲央行）取至少 12 小时前的最近一条；逐小时数据取约 24 小时前 */
     const past = S.daily
       ? S.history.filter((h) => Date.parse(h.t) <= now - 12 * 3600e3).sort((a, b) => Date.parse(b.t) - Date.parse(a.t))[0] || null
@@ -153,22 +148,22 @@
       const li = document.querySelector(`li[data-id="${CSS.escape(e.id)}"]`);
       if (!li) continue;
       const val = FX.entryCny(e, rates);
+      const unit = unitName(e.code);
       const input = li.querySelector("input[data-amt]");
-      if (input !== active) input.value = val && S.cny !== null ? FX.fmtAmount(S.cny / val, e.code) : "";
-      input.placeholder = val ? "0" : "—";
       input.disabled = !val;
+      updateCalc(li, e, val);
       li.querySelector('[data-t="label"]').textContent = e.label;
       li.querySelector('[data-t="tag"]').textContent = tagText(e);
       const note = li.querySelector('[data-t="note"]');
       note.textContent = e.note; note.hidden = !e.note;
-      const rateEl = li.querySelector('[data-t="rate"]');
+      const headEl = li.querySelector('[data-t="head"]');
+      const ladderEl = li.querySelector('[data-t="ladder"]');
       if (val) {
-        const per = perFor(e.code);
-        rateEl.textContent = `${per} ${e.code} = ${FX.fmtRate(val * per)} 元`;
-        rateEl.className = "rate";
+        headEl.innerHTML = `<span class="h-unit">1 ${esc(unit)} =</span> <b class="num">${esc(FX.fmtRate(val))}</b> <span class="h-unit">元</span>`;
+        ladderEl.innerHTML = FX.ladderFor(val).map((n) => `<span class="step"><span class="num">${FX.fmtInt(n)}</span> ${esc(unit)} = <b class="num">${esc(FX.fmtCny(n * val))}</b> 元</span>`).join("");
       } else {
-        rateEl.textContent = S.rates ? (e.kind === "custom" && e.mode === "fixed" ? "请填写固定汇率" : `暂无 ${e.code} 汇率，下次更新时获取`) : "等待汇率";
-        rateEl.className = "pending";
+        headEl.innerHTML = `<span class="pending">${S.rates ? (e.kind === "custom" && e.mode === "fixed" ? "请填写固定汇率" : `暂无 ${esc(e.code)} 汇率`) : "等待汇率"}</span>`;
+        ladderEl.innerHTML = "";
       }
       const fixed = e.kind === "custom" && e.mode === "fixed";
       const liveNow = FX.cnyPerUnit(rates, e.code);
@@ -186,6 +181,7 @@
       const tgt = st ? ` · 目标 ${e.targetDir === "below" ? "≤" : "≥"} ${FX.fmtRate(e.target)}` : "";
       li.querySelector('[data-t="pill"]').innerHTML = st ? `<span class="pill ${st.state}" title="目标${e.targetDir === "below" ? "低于" : "高于"} ${esc(FX.fmtRate(e.target))} 元">${esc(st.text)}${esc(tgt)}</span>` : "";
     }
+    if (S.popFor && !$("pricePop").hidden) $("pricePop").innerHTML = priceCardHtml(S.popFor.code);
   }
 
   function renderStatus() {
@@ -214,7 +210,7 @@
     if (!S.editing) return;
     const c = S.draft;
     const set = (id, v) => { const el = $(id); if (document.activeElement !== el) el.value = v; };
-    set("fTitle", c.title); set("fSub", c.subtitle); set("fAmount", String(c.defaultAmount)); set("fPer100", c.per100 ? "1" : "0");
+    set("fTitle", c.title); set("fSub", c.subtitle);
     $("pwBtn").hidden = !shared();
     $("pwBtn").textContent = S.mode === "pages" ? "修改密码 / 更换令牌" : "修改管理密码";
     $("modeHint").textContent = S.mode === "cloud"
@@ -249,29 +245,121 @@
   }
 
   /* ---------- 金额输入 ---------- */
-  $("cnyInput").addEventListener("input", (ev) => {
-    const v = FX.parseAmount(ev.target.value);
-    if (Number.isNaN(v)) { ev.target.setAttribute("aria-invalid", "true"); return; }
-    ev.target.removeAttribute("aria-invalid");
-    S.cny = v === null ? 0 : v;
-    updateNumbers();
+  /* ---------- 物价卡片 ---------- */
+  function priceCardHtml(code) {
+    const c = priceCountry(code);
+    if (!c) return "";
+    const cn = PRICES.countries[PRICES.baseline];
+    const rate = FX.cnyPerUnit(S.rates && S.rates.rates, code);
+    const col = c.index.col / cn.index.col;
+    const times = (r) => (r >= 1 ? `约为中国的 ${r.toFixed(r >= 10 ? 0 : 1)} 倍` : `约为中国的 ${Math.round(r * 100)}%`);
+    const bars = [["生活成本", "col"], ["超市", "groceries"], ["餐厅", "restaurant"], ["房租", "rent"]];
+    const max = Math.max(...bars.flatMap(([, k]) => [c.index[k], cn.index[k]])) * 1.08;
+    const bar = (v, cls) => `<span class="pc-bar ${cls}"><i style="width:${((v / max) * 100).toFixed(1)}%"></i></span>`;
+    const ratioCell = (key, local, china) => {
+      const r = FX.priceRatio(local, rate, china);
+      if (r === null) return `<td class="pc-r">—</td>`;
+      const cls = key === "salary" ? "" : r > 1.15 ? "pricier" : r < 0.87 ? "cheaper" : "";
+      return `<td class="pc-r ${cls}">×${r.toFixed(r >= 10 ? 0 : r >= 1 ? 1 : 2)}</td>`;
+    };
+    return `<div class="pc">
+      <div class="pc-head"><strong>${esc(c.name)}物价</strong><span>Numbeo · ${esc(c.updated)}</span></div>
+      ${c.note ? `<p class="pc-note">${esc(c.note)}</p>` : ""}
+      <div class="pc-index">
+        <div class="pc-big"><span>生活成本指数</span><b class="num">${c.index.col.toFixed(1)}</b><span class="pc-cmp">中国 ${cn.index.col.toFixed(1)} · ${times(col)}</span></div>
+        <div class="pc-bars">${bars.map(([label, k]) => `<span class="pc-bl">${label}</span>${bar(c.index[k], "here")}<span class="pc-bv num">${c.index[k].toFixed(1)}</span>${bar(cn.index[k], "cn")}<span class="pc-bv cn num">${cn.index[k].toFixed(1)}</span>`).join("")}</div>
+        <p class="pc-legend"><span class="sw here"></span>${esc(c.name)} <span class="sw cn"></span>中国 · 指数以纽约 = 100，${esc(c.indexPeriod)}</p>
+      </div>
+      <div class="pc-scroll"><table class="pc-table">
+        <thead><tr><th>商品</th><th>当地（${esc(c.currency)}）</th><th>≈ 人民币</th><th>中国的几倍</th></tr></thead>
+        ${PRICES.groups.map((g) => `<tbody><tr class="pc-g"><th colspan="4">${esc(g.name)}</th></tr>${g.items.map(([k, label, unit]) => {
+          const local = c.prices[k], china = cn.prices[k];
+          return `<tr><td>${esc(label)}${unit ? `<span class="pc-u">${esc(unit)}</span>` : ""}</td><td class="num">${esc(FX.fmtAmount(local, code))}</td><td class="num">${rate ? "¥" + esc(FX.fmtCny(local * rate)) : "—"}</td>${ratioCell(k, local, china)}</tr>`;
+        }).join("")}</tbody>`).join("")}
+      </table></div>
+      <p class="pc-foot">价格为全国平均，大城市通常更高；人民币折算按当前实时汇率。<span class="pricier">红</span>表示比中国贵，<span class="cheaper">绿</span>表示比中国便宜。</p>
+    </div>`;
+  }
+
+  const pop = () => $("pricePop");
+  const finePointer = () => matchMedia("(hover: hover) and (pointer: fine)").matches && innerWidth >= 700;
+  let popTimer = 0, hideTimer = 0;
+  function showPop(li, viaButton) {
+    const e = view().entries.find((x) => x.id === li.dataset.id);
+    if (!e || !priceCountry(e.code)) return;
+    clearTimeout(hideTimer);
+    if (!finePointer()) { openModal(`<h2 id="modalTitle" class="sr-title">${esc(priceCountry(e.code).name)}物价</h2>${priceCardHtml(e.code)}<div class="acts"><button class="btn" type="button" data-close>关闭</button></div>`); return; }
+    const p = pop();
+    S.popFor = { id: e.id, code: e.code };
+    p.innerHTML = priceCardHtml(e.code);
+    p.hidden = false;
+    const r = li.getBoundingClientRect();
+    const w = p.offsetWidth, h = p.offsetHeight;
+    let left = Math.min(r.right - w - 8, innerWidth - w - 16);
+    left = Math.max(16, left);
+    let top = r.top + scrollY + 52;
+    if (r.top + 52 + h > innerHeight - 12 && r.top - h - 8 > 0) top = r.top + scrollY - h + 8; /* 下面放不下就放到上面 */
+    p.style.left = left + scrollX + "px";
+    p.style.top = top + "px";
+    document.querySelectorAll(".pricebtn[aria-expanded=true]").forEach((b) => b.setAttribute("aria-expanded", "false"));
+    li.querySelector(".pricebtn")?.setAttribute("aria-expanded", "true");
+    if (viaButton) p.dataset.pinned = "1"; else delete p.dataset.pinned;
+  }
+  function hidePop(force) {
+    const p = pop();
+    if (!force && p.dataset.pinned) return;
+    p.hidden = true; delete p.dataset.pinned; S.popFor = null;
+    document.querySelectorAll(".pricebtn[aria-expanded=true]").forEach((b) => b.setAttribute("aria-expanded", "false"));
+  }
+  $("list").addEventListener("mouseover", (ev) => {
+    if (S.editing || !finePointer()) return;
+    const li = ev.target.closest("li[data-id]");
+    if (!li || (S.popFor && S.popFor.id === li.dataset.id)) { clearTimeout(hideTimer); return; }
+    clearTimeout(popTimer);
+    popTimer = setTimeout(() => showPop(li, false), 220);
   });
-  $("cnyInput").addEventListener("blur", () => updateNumbers());
+  $("list").addEventListener("mouseout", (ev) => {
+    const li = ev.target.closest("li[data-id]");
+    if (!li || li.contains(ev.relatedTarget) || pop().contains(ev.relatedTarget)) return;
+    clearTimeout(popTimer);
+    hideTimer = setTimeout(() => hidePop(false), 180);
+  });
+  document.addEventListener("mouseover", (ev) => { if (pop().contains(ev.target)) clearTimeout(hideTimer); });
+  $("pricePop").addEventListener("mouseleave", (ev) => {
+    if (ev.relatedTarget && ev.relatedTarget.closest && ev.relatedTarget.closest(`li[data-id]`)) return;
+    hideTimer = setTimeout(() => hidePop(false), 180);
+  });
+  $("list").addEventListener("click", (ev) => {
+    const b = ev.target.closest("button.pricebtn");
+    if (!b) return;
+    const li = b.closest("li[data-id]");
+    if (!pop().hidden && S.popFor && S.popFor.id === li.dataset.id && pop().dataset.pinned) return hidePop(true);
+    showPop(li, true);
+  });
+  document.addEventListener("click", (ev) => {
+    if (pop().hidden || pop().contains(ev.target) || ev.target.closest("button.pricebtn")) return;
+    hidePop(true);
+  });
+  document.addEventListener("keydown", (ev) => { if (ev.key === "Escape" && !pop().hidden) hidePop(true); });
+  window.addEventListener("resize", () => hidePop(true));
+
+  function updateCalc(li, e, val) {
+    const input = li.querySelector("input[data-amt]");
+    const out = li.querySelector('[data-t="out"]');
+    const v = FX.parseAmount(input.value);
+    input.toggleAttribute("aria-invalid", Number.isNaN(v));
+    out.innerHTML = val && v !== null && !Number.isNaN(v) ? `= <b class="num">${esc(FX.fmtCny(v * val))}</b> 元` : "= — 元";
+  }
   $("list").addEventListener("input", (ev) => {
     const t = ev.target;
     if (t.dataset.amt) {
       const e = view().entries.find((x) => x.id === t.dataset.amt);
-      const val = e && FX.entryCny(e, S.rates && S.rates.rates);
-      const v = FX.parseAmount(t.value);
-      if (Number.isNaN(v) || !val) { t.setAttribute("aria-invalid", "true"); return; }
-      t.removeAttribute("aria-invalid");
-      S.cny = (v === null ? 0 : v) * val;
-      updateNumbers();
+      S.amounts[t.dataset.amt] = t.value;
+      if (e) updateCalc(t.closest("li"), e, FX.entryCny(e, S.rates && S.rates.rates));
       return;
     }
     if (t.dataset.f && S.editing) editField(t, false);
   });
-  $("list").addEventListener("focusout", (ev) => { if (ev.target.dataset.amt) updateNumbers(); });
 
   /* ---------- 编辑 ---------- */
   const NUM_FIELDS = new Set(["fixed", "spread", "target"]);
@@ -341,17 +429,14 @@
     const d = S.draft;
     if (t.id === "fTitle") d.title = t.value;
     if (t.id === "fSub") d.subtitle = t.value;
-    if (t.id === "fAmount") { const v = FX.parseAmount(t.value); if (v > 0) d.defaultAmount = v; }
-    if (t.id === "fPer100") d.per100 = t.value === "1";
     $("siteTitle").textContent = d.title || "人民币汇率台";
     $("siteSub").textContent = d.subtitle;
     saveDraft();
-    if (t.id === "fPer100") { S.per100 = null; render(); }
     renderDock();
   }
   $("sitePanel").addEventListener("input", sitePanelInput);
   $("sitePanel").addEventListener("change", (ev) => {
-    if (["fTitle", "fSub", "fAmount", "fPer100"].includes(ev.target.id)) {
+    if (["fTitle", "fSub"].includes(ev.target.id)) {
       S.draft = FX.content(S.draft); saveDraft();
       pushUndoFrom(S.fieldBefore); S.fieldBefore = JSON.stringify(S.draft);
     }
@@ -854,9 +939,6 @@
   });
 
   /* ---------- 显示方式 ---------- */
-  const setPer = (on) => { S.per100 = on; store.set(LS_VIEW, { per100: on }); render(); };
-  $("unit1").addEventListener("click", () => setPer(false));
-  $("unit100").addEventListener("click", () => setPer(true));
 
   /* ---------- 弹窗与提示 ---------- */
   let lastFocus = null;
@@ -1010,8 +1092,6 @@
   }
 
   /* ---------- 启动 ---------- */
-  const view0 = store.get(LS_VIEW);
-  if (view0 && typeof view0.per100 === "boolean") S.per100 = view0.per100;
   render();
   if (window.claude && typeof window.claude.use === "function") {
     window.claude.use("db").then((db) => {

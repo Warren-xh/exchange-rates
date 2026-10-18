@@ -21,6 +21,33 @@ test("rate math: per unit and custom spread/fixed", () => {
   assert.equal(FX.cnyPerUnit(rates, "CNY"), 1);
 });
 
+test("ladder and yuan formatting", () => {
+  assert.deepEqual(FX.ladderFor(7.5185), [10, 100, 1000]);   // 欧元
+  assert.deepEqual(FX.ladderFor(0.2007), [10, 100, 1000]);   // 泰铢
+  assert.deepEqual(FX.ladderFor(0.0423), [100, 1000, 10000]); // 日元
+  assert.deepEqual(FX.ladderFor(0.000258), [10000, 100000, 1000000]); // 越南盾
+  assert.deepEqual(FX.ladderFor(0.000371), [10000, 100000, 1000000]); // 印尼盾
+  assert.deepEqual(FX.ladderFor(null), []);
+  assert.equal(FX.fmtCny(751.848), "751.85");
+  assert.equal(FX.fmtCny(7518.48), "7,518.48");
+  assert.equal(FX.fmtCny(0.2007), "0.2007");
+  assert.equal(FX.fmtCny(0.000258), "0.000258");
+  assert.equal(FX.fmtCny(0.0423), "0.0423");
+  const r = FX.priceRatio(20, 7.5185, 20);
+  assert.ok(Math.abs(r - 7.5185) < 1e-9);
+  assert.equal(FX.priceRatio(0, 1, 1), null);
+});
+
+test("price data is complete for every listed country", () => {
+  const P = require("../src/prices.js");
+  const keys = P.groups.flatMap((g) => g.items.map((i) => i[0]));
+  for (const [code, c] of Object.entries(P.countries)) {
+    for (const k of keys) assert.ok(c.prices[k] > 0, code + " missing " + k);
+    for (const k of ["col", "rent", "groceries", "restaurant"]) assert.ok(c.index[k] > 0, code + " index " + k);
+  }
+  for (const cc of Object.values(P.byCurrency)) assert.ok(P.countries[cc]);
+});
+
 test("target status", () => {
   const e = { target: 7.5, targetDir: "below" };
   assert.equal(FX.targetStatus(e, 7.4).state, "hit");

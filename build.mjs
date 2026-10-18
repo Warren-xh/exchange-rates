@@ -5,6 +5,7 @@ const body = (repo) => [
   r("./src/body.html"),
   repo ? `<script>window.FX_REPO = ${JSON.stringify(repo)};</script>` : "",
   "<script>\n" + r("./src/core.js") + "\n</script>",
+  "<script>\n" + r("./src/prices.js") + "\n</script>",
   "<script>\n" + r("./src/github.js") + "\n</script>",
   "<script>\n" + r("./src/app.js") + "\n</script>",
 ].join("\n");

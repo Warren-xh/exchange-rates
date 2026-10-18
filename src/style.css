@@ -96,29 +96,14 @@ a { color: var(--accent); text-underline-offset: 2px; }
 /* 牌价板 */
 .board { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
 .board-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 10px 16px; border-bottom: 1px solid var(--line); background: var(--surface-2); font-size: 12px; color: var(--ink-2); letter-spacing: 0.06em; }
-.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; background: var(--surface); }
-.seg button { border: 0; background: transparent; padding: 3px 10px; font-size: 12px; color: var(--ink-2); }
-.seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
 
-.row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 4px 16px; padding: 14px 16px; border-bottom: 1px solid var(--line); align-items: center; }
+.row { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 16px; padding: 16px; border-bottom: 1px solid var(--line); align-items: center; }
 .row:last-child { border-bottom: 0; }
-.row.base { background: color-mix(in srgb, var(--seal) 5%, var(--surface)); }
 .cur { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .code { flex: none; display: inline-grid; place-items: center; min-width: 48px; height: 28px; padding: 0 6px; border-radius: 6px; background: var(--surface-2); font-family: var(--f-num); font-weight: 500; font-size: 13px; letter-spacing: 0.04em; }
-.row.base .code { background: var(--seal); color: #fff; }
 .names { display: grid; min-width: 0; }
 .label { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tag { font-size: 12px; color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.amt { position: relative; display: block; }
-.amt input {
-  width: 100%; text-align: right; border: 1px solid transparent; border-radius: 8px; background: transparent;
-  padding: 4px 8px; font-family: var(--f-num); font-variant-numeric: tabular-nums; font-size: clamp(18px, 4.6vw, 24px); font-weight: 500;
-}
-.amt input:hover { border-color: var(--line); }
-.amt input:focus { border-color: var(--accent); background: var(--paper); outline: none; }
-.amt input[aria-invalid="true"] { border-color: var(--rise); }
-.meta { grid-column: 1 / -1; display: flex; align-items: center; gap: 6px 12px; flex-wrap: wrap; font-size: 13px; color: var(--ink-2); min-width: 0; }
-.rate { font-family: var(--f-num); font-variant-numeric: tabular-nums; }
 .chg { font-family: var(--f-num); font-variant-numeric: tabular-nums; font-size: 12px; padding: 1px 6px; border-radius: 4px; }
 .chg.up { color: var(--rise); background: var(--rise-bg); }
 .chg.down { color: var(--fall); background: var(--ok-bg); }
@@ -192,12 +177,72 @@ footer.foot p { margin: 0; }
 
 @media (max-width: 520px) {
   .row { grid-template-columns: minmax(0, 1fr); }
-  .amt input { text-align: left; padding-left: 0; }
-  .amt input:focus, .amt input:hover { padding-left: 8px; }
-  .spark { width: 64px; }
+    .amt input:focus,   .spark { width: 64px; }
 }
 @media (prefers-reduced-motion: no-preference) {
   .row { transition: background-color 0.2s; }
   .flash { animation: flash 1.2s ease-out; }
   @keyframes flash { from { background: color-mix(in srgb, var(--accent) 14%, var(--surface)); } }
 }
+
+/* 外币 → 人民币 */
+.head { display: flex; align-items: baseline; justify-content: flex-end; gap: 6px; flex-wrap: wrap; min-width: 0; }
+.head b { font-size: clamp(22px, 5vw, 28px); font-weight: 500; letter-spacing: -0.01em; }
+.h-unit { color: var(--ink-2); font-size: 14px; }
+.ladder { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+.step { display: inline-flex; align-items: baseline; gap: 4px; padding: 4px 10px; border-radius: 999px; background: var(--surface-2); font-size: 13px; color: var(--ink-2); white-space: nowrap; }
+.step b { color: var(--ink); font-weight: 500; }
+.foot { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; min-width: 0; }
+.calc { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; font-size: 14px; }
+.calc-in { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); overflow: hidden; }
+.calc-in:focus-within { border-color: var(--accent); }
+.calc-in input { width: 9.5em; border: 0; background: transparent; padding: 6px 8px; font-family: var(--f-num); font-variant-numeric: tabular-nums; outline: none; }
+.calc-in input[aria-invalid] { color: var(--rise); }
+.calc-unit { padding: 0 10px; color: var(--ink-2); font-size: 13px; border-left: 1px solid var(--line); align-self: stretch; display: grid; place-items: center; background: var(--surface-2); }
+.calc-out { color: var(--ink-2); }
+.calc-out b { color: var(--ink); font-size: 16px; font-weight: 500; }
+.meta { display: flex; align-items: center; gap: 6px 10px; flex-wrap: wrap; font-size: 13px; color: var(--ink-2); min-width: 0; }
+.pricebtn { border: 1px solid var(--line); background: var(--surface); color: var(--accent); border-radius: 999px; padding: 2px 10px; font-size: 12px; }
+.pricebtn:hover, .pricebtn[aria-expanded="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--surface)); }
+.hint-hover { color: var(--ink-3); letter-spacing: 0; }
+@media (hover: none), (max-width: 699px) { .hint-hover { display: none; } }
+.sr-title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* 物价卡片 */
+.pop { position: absolute; z-index: 30; width: min(460px, calc(100vw - 32px)); max-height: min(78vh, 640px); overflow: auto; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 2px 6px rgba(19, 38, 58, 0.08), 0 18px 48px rgba(19, 38, 58, 0.18); padding: 16px; }
+.pc { display: grid; gap: 12px; font-size: 13px; }
+.pc-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.pc-head strong { font-family: var(--f-display); font-size: 18px; }
+.pc-head span { color: var(--ink-3); font-size: 12px; }
+.pc-note { margin: 0; color: var(--ink-2); }
+.pc-index { display: grid; gap: 8px; padding: 12px; border-radius: 10px; background: var(--paper); }
+.pc-big { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.pc-big b { font-size: 24px; font-weight: 500; }
+.pc-cmp { color: var(--ink-2); }
+.pc-bars { display: grid; grid-template-columns: auto minmax(0, 1fr) 2.6em minmax(0, 1fr) 2.6em; gap: 5px 8px; align-items: center; }
+.pc-bl { color: var(--ink-2); font-size: 12px; }
+.pc-bar { height: 8px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+.pc-bar i { display: block; height: 100%; border-radius: 4px; }
+.pc-bar.here i { background: var(--accent); }
+.pc-bar.cn i { background: var(--seal); opacity: 0.55; }
+.pc-bv { font-size: 12px; text-align: right; }
+.pc-bv.cn { color: var(--ink-3); }
+.pc-legend { margin: 0; font-size: 12px; color: var(--ink-3); display: flex; align-items: center; gap: 4px 6px; flex-wrap: wrap; }
+.sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
+.sw.here { background: var(--accent); }
+.sw.cn { background: var(--seal); opacity: 0.55; margin-left: 6px; }
+.pc-scroll { overflow-x: auto; }
+.pc-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.pc-table th, .pc-table td { padding: 5px 6px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--line); }
+.pc-table th:first-child, .pc-table td:first-child { text-align: left; white-space: normal; }
+.pc-table thead th { font-size: 11px; color: var(--ink-3); font-weight: 500; letter-spacing: 0.04em; }
+.pc-table .num { font-family: var(--f-num); font-size: 12px; }
+.pc-g th { text-align: left; padding-top: 10px; font-size: 12px; color: var(--ink); font-weight: 700; border-bottom-color: transparent; }
+.pc-u { display: block; color: var(--ink-3); font-size: 11px; }
+.pc-r { font-family: var(--f-num); font-size: 12px; color: var(--ink-2); }
+.pricier { color: var(--rise); }
+.cheaper { color: var(--fall); }
+.pc-r.pricier, .pc-r.cheaper { font-weight: 500; }
+.pc-foot { margin: 0; font-size: 12px; color: var(--ink-3); }
+.modal .pc { font-size: 14px; }
+.pc-table td:first-child { min-width: 7.5em; }
